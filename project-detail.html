@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Details — Karthiban A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/devicon/2.15.1/devicon.min.css">
+
+<style>
+/* ============================================================
+   DESIGN TOKENS — Replicating project-detail page style
+   ============================================================ */
+:root {
+  --bg-primary:   #0d0d0d;
+  --bg-secondary: #141414;
+  --bg-card:      #1a1a1a;
+  --border:       #2a2a2a;
+  --text-primary: #f0f0f0;
+  --text-secondary:#888888;
+  --text-muted:   #555555;
+  --accent:       #d4d4d4;
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  cursor: none;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: #f0f0f0; color: #000; }
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+#cursor {
+  position: fixed;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: difference;
+}
+#cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(240,240,240,0.3);
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+}
+body.hovering #cursor { width: 18px; height: 18px; }
+
+/* ============================================================
+   PARALLAX BLOBS
+   ============================================================ */
+#blob-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.04;
+}
+.blob-1 { width: 600px; height: 600px; background: #ffffff; top: -100px; left: -100px; }
+.blob-2 { width: 500px; height: 500px; background: #888888; bottom: -80px; right: -80px; }
+
+/* ============================================================
+   HEADER NAV — Match layout of detail page
+   ============================================================ */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(13, 13, 13, 0.4);
+  backdrop-filter: blur(20px);
+  border-b: 1px solid rgba(255, 255, 255, 0.05);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  cursor: none;
+}
+.btn-back:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+.btn-back svg { width: 14px; height: 14px; transition: transform 0.3s; }
+.btn-back:hover svg { transform: translateX(-4px); }
+
+.btn-live-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  cursor: none;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+.btn-live-header:hover { background: #e0e0e0; }
+.btn-live-header svg { width: 13px; height: 13px; }
+
+/* ============================================================
+   MAIN CONTENT GRID
+   ============================================================ */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Gallery Display */
+.gallery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.gallery-main {
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Premium box placeholder with grid lines */
+.mockup-canvas {
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at 50% 50%, #1a1a1a 10%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-muted);
+  position: relative;
+  overflow: hidden;
+}
+.mockup-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.mockup-icon {
+  font-size: 48px;
+  opacity: 0.25;
+}
+.mockup-lbl {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.gallery-thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.thumb-card {
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  opacity: 0.5;
+  cursor: none;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.thumb-card:hover { opacity: 0.8; }
+.thumb-card.active { opacity: 1; border-color: var(--text-primary); }
+
+/* Details Panels (Right Column) */
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.panel-details {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+}
+.panel-details::before {
+  content: '';
+  position: absolute;
+  top: -24px; right: -24px;
+  width: 90px; height: 90px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 50%;
+  filter: blur(16px);
+}
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.info-label svg { width: 12px; height: 12px; }
+.info-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+}
+.info-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.info-actions {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 24px;
+}
+.action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  cursor: none;
+}
+.action-btn.btn-live {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+.action-btn.btn-live:hover { background: #e0e0e0; }
+.action-btn.btn-gh {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.action-btn.btn-gh:hover { background: rgba(255,255,255,0.08); border-color: #555; }
+.action-btn svg { width: 14px; height: 14px; }
+
+.panel-tech {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+}
+.tech-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tech-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+}
+
+.panel-features {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+}
+.features-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.features-list li {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.feature-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+@media (max-width: 960px) {
+  .detail-grid { grid-template-columns: 1fr; gap: 32px; }
+  main { padding: 100px 20px 60px; }
+  body { cursor: auto; }
+  #cursor, #cursor-ring { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Parallax Blobs -->
+<div id="blob-container">
+  <div class="blob blob-1" id="blob1"></div>
+  <div class="blob blob-2" id="blob2"></div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <button class="btn-back" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span>Back to Home</span>
+    </button>
+    <a class="btn-live-header" id="headerLiveBtn" href="#" target="_blank" style="display:none;">
+      <span>Live Site</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- Main Detail View -->
+<main>
+  <div class="detail-grid">
+    <!-- Gallery -->
+    <div class="gallery-section">
+      <div class="gallery-main">
+        <div class="mockup-canvas">
+          <div class="mockup-icon" id="mockupIcon">💻</div>
+          <span class="mockup-lbl" id="mockupTitle">LOGIXSENSE PLATFORM</span>
+        </div>
+      </div>
+      <div class="gallery-thumbs" id="thumbsGrid">
+        <div class="thumb-card active" onclick="setThumb(0)">Main Panel</div>
+        <div class="thumb-card" onclick="setThumb(1)">AI Engine</div>
+        <div class="thumb-card" onclick="setThumb(2)">Database</div>
+        <div class="thumb-card" onclick="setThumb(3)">API Integration</div>
+      </div>
+    </div>
+
+    <!-- Info columns -->
+    <div class="info-section">
+      <!-- Details Panel -->
+      <div class="panel-details">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/><polyline points="2 15.5 12 9 22 15.5"/><line x1="12" y1="2" x2="12" y2="9"/></svg>
+          <span>Project Showcase</span>
+        </div>
+        <h1 class="info-title" id="projTitle">Project Title</h1>
+        <p class="info-desc" id="projDesc">Detailed description goes here...</p>
+        <div class="info-actions">
+          <a class="action-btn btn-live" id="actionLive" href="#" target="_blank" style="display:none;">
+            <span>Live Site</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+          <a class="action-btn btn-gh" id="actionGh" href="#" target="_blank">
+            <span>Github</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Tech Panel -->
+      <div class="panel-tech">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <span>Technologies Used</span>
+        </div>
+        <div class="tech-pills" id="techGrid">
+          <!-- Badges generated -->
+        </div>
+      </div>
+
+      <!-- Features Panel -->
+      <div class="panel-features" id="featuresPanel">
+        <div class="info-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          <span>Key Features</span>
+        </div>
+        <ul class="features-list" id="featuresList">
+          <!-- Items generated -->
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ---- DETAILED PROJECTS DATA REGISTRY ---- */
+const projects = {
+  logixsense: {
+    title: 'LogixSense',
+    tag: 'Smart supply chain & logistics management',
+    desc: 'A complete web dashboard for small-to-mid-sized logistics companies in India to manage fleets, track routes, and optimize warehousing operations. It integrates live traffic feeds via Google Maps API, auto-assigns vehicles based on loads, and provides interactive telemetry insights using the Gemini 2.0 Flash model to flag bottlenecks.',
+    stack: ['React.js', 'Firebase Firestore', 'Gemini 2.0 Flash', 'Google Maps API', 'Netlify', 'TailwindCSS'],
+    features: [
+      'Interactive maps for route telemetry and vehicle tracking.',
+      'AI insights that forecast fleet fuel efficiency and delays.',
+      'Database tracking for shipments, drivers, and orders.',
+      'Fully responsive dashboard controls.'
+    ],
+    icon: '📦'
+  },
+  aitutor: {
+    title: 'AI Tutor',
+    tag: 'AI-powered learning assistant',
+    desc: 'An AI-powered teaching companion designed to help college students explain complex math, coding, and science topics. It supports user profiles, saves conversation context to Firebase Firestore, and utilizes conversational models to explain concepts at multiple complexity levels.',
+    stack: ['HTML5', 'CSS3', 'JavaScript (ES6)', 'Firebase Auth', 'Firestore', 'Generative AI API'],
+    features: [
+      'Instant topic summarization and code correction.',
+      'Context-aware chat logs persistent across user accounts.',
+      'Adaptive complexity toggle (Explain to a child / Expert).',
+      'Clean glassmorphic chat interface.'
+    ],
+    icon: '🧠'
+  },
+  safesignal: {
+    title: 'SafeSignal',
+    tag: 'Safety & emergency response',
+    desc: 'A high-accessibility safety app designed for immediate alerts in critical situations. It provides single-tap SOS signaling, captures device telemetry, and fires real-time alerts to close contacts using Firebase cloud alerts.',
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Firebase Database', 'Cloud Messaging'],
+    features: [
+      'Single-tap emergency signaling.',
+      'Instant notification broadcasts to active contacts.',
+      'Real-time GPS coordinate logging and sharing.',
+      'Highly accessible high-contrast user interface.'
+    ],
+    icon: '⚡'
+  },
+  gatherx: {
+    title: 'GatherX',
+    tag: 'Community event management',
+    desc: 'A unified community portal designed to let users discover, create, and participate in events. Handles RSVPs, registration forms, participant logs, and organizer reports smoothly with a clean responsive calendar.',
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Firebase Hosting', 'Cloud Firestore'],
+    features: [
+      'Real-time RSVPs and participant registrations.',
+      'Event calendar showing upcoming local meetups.',
+      'Custom registration form builder for organizers.',
+      'Modern, highly polished layout.'
+    ],
+    icon: '🌐'
+  },
+  savesprint: {
+    title: 'SaveSprint',
+    tag: 'Personal finance management',
+    desc: 'A personal bookkeeping dashboard designed to simplify financial habits. Track transactions, budgets, income logs, and monthly goals. Calculates savings rates and maps spending categories automatically.',
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Firebase Realtime DB'],
+    features: [
+      'Automatic expense categorisation and monthly charts.',
+      'Budget alerts when approaching custom spending limits.',
+      'Income logs and transaction trackers.',
+      'Clean monochrome table listings.'
+    ],
+    icon: '💰'
+  },
+  hackverse: {
+    title: 'HackVerse',
+    tag: 'Hackathon community platform',
+    desc: 'An online hub for developers to check hackathon events, search for teammates with matching skillsets, and showcase completed projects.',
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Firebase Cloud'],
+    features: [
+      'Staged list of current global hackathons.',
+      'Teammate matchmaking filter by skills (React, Java, etc.).',
+      'Portfolio submissions for projects.',
+      'Fast-loading responsive interface.'
+    ],
+    icon: '🏆'
+  },
+  internhub: {
+    title: 'InternHub',
+    tag: 'Internship portal',
+    desc: 'A unified platform linking students with internship postings. Lets users check vacancies, apply directly with resume uploads, and trace their application milestones in real-time.',
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Firebase Auth', 'Storage'],
+    features: [
+      'Resume upload and storage integration.',
+      'Staged application tracker showing progress status.',
+      'Advanced filters for location, role, and duration.',
+      'Secure login portal for employers and students.'
+    ],
+    icon: '💼'
+  },
+  jarvis: {
+    title: 'Jarvis AI Chatbot',
+    tag: 'Conversational AI assistant',
+    desc: 'A sleek, sci-fi inspired conversational AI chatbot that stores user parameters and history on Firebase for continuity.',
+    stack: ['JavaScript (ES6)', 'Firebase Firestore', 'Generative AI API', 'CSS Grid'],
+    features: [
+      'Persistent chat thread history.',
+      'Highly responsive UI with clean messaging containers.',
+      'Variable prompt suggestions.',
+      'Fast API connection latency.'
+    ],
+    icon: '🤖'
+  },
+  spendsense: {
+    title: 'SpendSense',
+    tag: 'Budgeting tool',
+    desc: 'A lightweight budget calculator that gives quick overviews of expense metrics and forecasts weekly spending tolerances.',
+    stack: ['JavaScript', 'Firebase Firestore', 'Vanilla CSS'],
+    features: [
+      'Budget calculation tools with custom categories.',
+      'Visual progress meters showing limit warnings.',
+      'Fast client-side rendering.',
+      'Data caching for offline access.'
+    ],
+    icon: '📊'
+  },
+  tracebin: {
+    title: 'Tracebin',
+    tag: 'Waste telemetry and smart bins',
+    desc: 'A waste management administration system that aggregates telemetry from simulated IoT trash bins. Helps route garbage trucks and optimize collection schedules.',
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Firebase Database', 'Google Maps API'],
+    features: [
+      'Live status display showing bin fill levels.',
+      'Optimized routing for collections.',
+      'Historical reports on garbage output.',
+      'Clean interactive control grids.'
+    ],
+    icon: '🗑️'
+  }
+};
+
+/* ---- DYNAMIC PROJECT LOAD ---- */
+let currentProjectId = '';
+function loadProject() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  const proj = projects[id] || projects['logixsense']; // fallback
+  currentProjectId = id || 'logixsense';
+
+  // Set titles and desc
+  document.getElementById('projTitle').textContent = proj.title;
+  document.getElementById('projDesc').textContent = proj.desc;
+  document.title = `${proj.title} — Project Details`;
+  
+  // Set mockup title/icon
+  document.getElementById('mockupIcon').textContent = proj.icon;
+  document.getElementById('mockupTitle').textContent = `${proj.title} Showcase`;
+
+  // Render tech grid
+  const techGrid = document.getElementById('techGrid');
+  techGrid.innerHTML = proj.stack.map(s => `<span class="tech-pill">${s}</span>`).join('');
+
+  // Render features list
+  const list = document.getElementById('featuresList');
+  if (proj.features && proj.features.length > 0) {
+    document.getElementById('featuresPanel').style.display = 'block';
+    list.innerHTML = proj.features.map(f => `<li><span class="feature-dot"></span><span>${f}</span></li>`).join('');
+  } else {
+    document.getElementById('featuresPanel').style.display = 'none';
+  }
+
+  // Set action buttons
+  const live = proj.live || '';
+  const gh = proj.gh || 'https://github.com/karthiban3333-maker';
+
+  const actionLive = document.getElementById('actionLive');
+  const headerLiveBtn = document.getElementById('headerLiveBtn');
+  if (live) {
+    actionLive.href = live;
+    actionLive.style.display = 'inline-flex';
+    headerLiveBtn.href = live;
+    headerLiveBtn.style.display = 'inline-flex';
+  } else {
+    actionLive.style.display = 'none';
+    headerLiveBtn.style.display = 'none';
+  }
+  document.getElementById('actionGh').href = gh;
+}
+loadProject();
+
+/* ---- BACK BUTTON Milestones ---- */
+function goBack() {
+  window.location.href = `index.html#projects`;
+}
+
+/* ---- ACTIVE GALLERY THUMBS ---- */
+function setThumb(idx) {
+  document.querySelectorAll('.thumb-card').forEach((card, i) => {
+    card.classList.toggle('active', i === idx);
+  });
+  // Simulate showing different sections on mockup canvas
+  const labels = ['Showcase', 'Architecture', 'Endpoints & Telemetry', 'User Portal API'];
+  document.getElementById('mockupTitle').textContent = `${projects[currentProjectId].title} — ${labels[idx]}`;
+}
+
+/* ---- CUSTOM CURSOR ---- */
+const cursorDot  = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let ringX = 0, ringY = 0, dotX = 0, dotY = 0;
+let mouseX = 0, mouseY = 0;
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  dotX = e.clientX;
+  dotY = e.clientY;
+  cursorDot.style.left = dotX + 'px';
+  cursorDot.style.top  = dotY + 'px';
+});
+
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  cursorRing.style.left = ringX + 'px';
+  cursorRing.style.top  = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button, .thumb-card').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+});
+
+/* ---- PARALLAX SCROLL BLOBS ---- */
+window.addEventListener('scroll', () => {
+  const scroll = window.pageYOffset;
+  document.getElementById('blob1').style.transform = `translate(${Math.sin(scroll/130)*90}px, ${Math.cos(scroll/130)*30}px)`;
+  document.getElementById('blob2').style.transform = `translate(${Math.cos(scroll/130)*90}px, ${Math.sin(scroll/130)*30}px)`;
+});
+</script>
+</body>
+</html>

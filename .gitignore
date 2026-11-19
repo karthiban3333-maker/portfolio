@@ -1,0 +1,29 @@
+# Local Netlify & build
+.netlify/
+dist/
+build/
+
+# Environment variables & secrets (NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+.env.*
+accounts.json
+*.key
+*.pem
+secret*
+secrets/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+
+# Temp files
+*_temp.*
+*.tmp
+*.log
